@@ -2,7 +2,7 @@
 
 ## Overview
 
-The backend of the Employee Attendance Management System is built using Spring Boot. This backend provides a RESTful API for managing employee and department and attenadance data, connecting to a basic MySQL database.
+The backend of the Employee Attendance Management System is built using Spring Boot. This backend provides a RESTful API for managing employee and department and attendance data, connecting to a basic MySQL database.
 
 ## Features
 
