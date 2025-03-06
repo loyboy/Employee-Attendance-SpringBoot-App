@@ -95,7 +95,12 @@ public class DepartmentController {
    * a success flag, and a message. Returns status 201 if successful.
    */
   @Operation(summary = "Create a new department", description = "Create a new department record")
-  @ApiResponse(responseCode = "201", description = "Department created successfully")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Department created successfully."),
+        @ApiResponse(responseCode = "400", description = "Bad Request found")
+      }
+  )
   @PostMapping
   public ResponseEntity<?> createDepartment(@RequestBody DepartmentRequest department) {
     if (department.getName().equals("") || department.getName() == null) {
@@ -125,7 +130,6 @@ public class DepartmentController {
       })
   @PutMapping("/{id}")
   public ResponseEntity<?> updateDepartment(@Parameter(description = "ID of the department to be updated") @PathVariable Long id, @RequestBody DepartmentRequest departmentDetails) {     
-    
     return departmentService.getDepartmentById(id)
     .map(department -> { 
       department.setName(departmentDetails.getName());

@@ -1,8 +1,11 @@
 package com.example.empattendance.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.empattendance.events.AttendanceRegisteredEvent;
 import com.example.empattendance.exception.BadRequestException;
 import com.example.empattendance.exception.ResourceNotFoundException;
 import com.example.empattendance.model.AttendanceRecord;
@@ -24,6 +27,9 @@ public class AttendanceService {
 
   @Autowired 
   private AttendanceRepository attendanceRepository;
+
+  @Autowired 
+  private ApplicationEventPublisher eventPublisher;
 
     /**
      * Sign in Employee.
@@ -53,6 +59,10 @@ public class AttendanceService {
         record.setType(AttendanceType.PRESENT);
         record.setSignInTime(LocalTime.now());
         record.setNotes(notes);
+
+        // Publish the event so that any listeners can react to a new sign in event
+        AttendanceRegisteredEvent event = new AttendanceRegisteredEvent(this, employee, record);
+        eventPublisher.publishEvent(event);
         
         return attendanceRepository.save(record);
     }
@@ -83,6 +93,10 @@ public class AttendanceService {
             String existingNotes = record.getNotes();
             record.setNotes(existingNotes != null ? existingNotes + " | " + notes : notes);
         }
+
+        // Publish the event so that any listeners can react to a new sign out event
+        AttendanceRegisteredEvent event = new AttendanceRegisteredEvent(this, record.getEmployee(), record);
+        eventPublisher.publishEvent(event);
         
         return attendanceRepository.save(record);
     }
@@ -110,6 +124,9 @@ public class AttendanceService {
             record.setSignInTime(null);
             record.setSignOutTime(null);
             record.setNotes(notes);
+            // Publish the event so that any listeners can react to a new sick leave event
+            AttendanceRegisteredEvent event = new AttendanceRegisteredEvent(this, employee, record);
+            eventPublisher.publishEvent(event);
             return attendanceRepository.save(record);
         } else {
             AttendanceRecord record = new AttendanceRecord();
@@ -117,6 +134,9 @@ public class AttendanceService {
             record.setDateOfAtt(date);
             record.setType(AttendanceType.SICK_LEAVE);
             record.setNotes(notes);
+            // Publish the event so that any listeners can react to a new sick leave event
+            AttendanceRegisteredEvent event = new AttendanceRegisteredEvent(this, employee, record);
+            eventPublisher.publishEvent(event);
             return attendanceRepository.save(record);
         }
     }
@@ -144,6 +164,9 @@ public class AttendanceService {
             record.setSignInTime(null);
             record.setSignOutTime(null);
             record.setNotes(notes);
+            // Publish the event so that any listeners can react to a new absence event
+            AttendanceRegisteredEvent event = new AttendanceRegisteredEvent(this, employee, record);
+            eventPublisher.publishEvent(event);
             return attendanceRepository.save(record);
         } else {
             AttendanceRecord record = new AttendanceRecord();
@@ -151,6 +174,9 @@ public class AttendanceService {
             record.setDateOfAtt(recordDate);
             record.setType(AttendanceType.ABSENT);
             record.setNotes(notes);
+            // Publish the event so that any listeners can react to a new absence event
+            AttendanceRegisteredEvent event = new AttendanceRegisteredEvent(this, employee, record);
+            eventPublisher.publishEvent(event);
             return attendanceRepository.save(record);
         }
     }
